@@ -1,0 +1,362 @@
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.app { max-width: 380px; margin: 0 auto; padding: 0 0 2rem; font-family: var(--font-sans); }
+.header { background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 1rem 1.25rem 0.75rem; }
+.header-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.header-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.tab { flex: 1; padding: 10px 4px; font-size: 11px; text-align: center; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab.active { color: var(--color-text-primary); border-bottom: 2px solid var(--color-text-primary); font-weight: 500; }
+.section { display: none; padding: 1rem 1.25rem; }
+.section.active { display: block; }
+.section-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 0.75rem; line-height: 1.5; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-bottom: 0.75rem; }
+.ng { color: var(--color-text-danger); font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+.ok { color: var(--color-text-success); font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+.phrase { font-size: 14px; color: var(--color-text-primary); line-height: 1.6; padding: 6px 10px; border-radius: var(--border-radius-md); }
+.phrase.ng-bg { background: var(--color-background-danger); }
+.phrase.ok-bg { background: var(--color-background-success); }
+.arrow { text-align: center; font-size: 16px; color: var(--color-text-secondary); margin: 5px 0; }
+.my-phrase-area { margin-top: 0.75rem; }
+.my-phrase-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+textarea { width: 100%; font-size: 13px; padding: 8px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); resize: none; background: var(--color-background-secondary); color: var(--color-text-primary); font-family: var(--font-sans); line-height: 1.6; }
+.scene-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); margin-bottom: 8px; }
+.hissatsu-btn { width: 100%; margin-top: 0.75rem; padding: 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); font-size: 12px; cursor: not-allowed; opacity: 0.45; font-family: var(--font-sans); transition: all 0.2s; }
+.hissatsu-btn.unlocked { opacity: 1; cursor: pointer; background: var(--color-background-warning); border-color: var(--color-border-tertiary); color: var(--color-text-warning); font-weight: 500; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.75} }
+.hissatsu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-start; justify-content: center; padding: 1.5rem; overflow-y: auto; }
+.hissatsu-overlay.show { display: flex; }
+.hissatsu-modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg); padding: 1.25rem; max-width: 320px; width: 100%; border: 0.5px solid var(--color-border-tertiary); margin: auto; }
+.hissatsu-badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 20px; background: var(--color-background-warning); color: var(--color-text-warning); margin-bottom: 12px; }
+.hissatsu-modal-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
+.h-item { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; margin-bottom: 8px; background: var(--color-background-secondary); }
+.h-scene { font-size: 10px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.h-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.65; }
+.h-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.6; }
+.hissatsu-close { width: 100%; margin-top: 12px; padding: 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-primary); font-size: 13px; cursor: pointer; font-family: var(--font-sans); }
+.mind-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-bottom: 0.75rem; }
+.mind-num { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.mind-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.mind-body { font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; }
+.mind-quote { font-size: 13px; color: var(--color-text-primary); background: var(--color-background-secondary); border-left: 2px solid var(--color-border-secondary); padding: 8px 10px; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; margin-top: 8px; line-height: 1.6; }
+.flow-step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 0.75rem; }
+.flow-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--color-text-primary); flex-shrink: 0; margin-top: 2px; }
+.flow-dot.alert { background: var(--color-background-danger); color: var(--color-text-danger); }
+.flow-dot.calm { background: var(--color-background-success); color: var(--color-text-success); }
+.flow-content { flex: 1; }
+.flow-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+.flow-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+.flow-connector { width: 1px; height: 14px; background: var(--color-border-secondary); margin-left: 13px; }
+.check-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+.check-item:last-child { border-bottom: none; }
+.check-box { width: 20px; height: 20px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; margin-top: 2px; }
+.check-box.checked { background: var(--color-background-success); }
+.check-label { font-size: 13px; color: var(--color-text-primary); line-height: 1.5; flex: 1; }
+.check-label.checked { color: var(--color-text-secondary); text-decoration: line-through; }
+.check-note { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.5; }
+.progress-bar-wrap { height: 4px; background: var(--color-background-secondary); border-radius: 2px; margin-bottom: 1rem; }
+.progress-bar { height: 4px; background: var(--color-text-success); border-radius: 2px; transition: width 0.3s; }
+.night-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: 0.1em; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
+</style>
+
+<div class="app">
+  <div class="header">
+    <div class="header-title">発達グレー子育てサポートブック</div>
+    <div class="header-sub">まな｜4児ママが実践した方法</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">声かけ変換</div>
+    <div class="tab" onclick="switchTab(1)">マインド</div>
+    <div class="tab" onclick="switchTab(2)">癇癪対応</div>
+    <div class="tab" onclick="switchTab(3)">夜チェック</div>
+  </div>
+
+  <!-- 声かけ変換 -->
+  <div class="section active" id="tab0">
+    <p class="section-label">4つ全部書くと、場面ごとの必殺技が解放されます。</p>
+    <div class="card">
+      <span class="scene-tag">朝の支度</span>
+      <div class="ng">NG</div>
+      <div class="phrase ng-bg">早くして！何回言えばわかるの！</div>
+      <div class="arrow">↓</div>
+      <div class="ok">OK</div>
+      <div class="phrase ok-bg">靴下→靴の順番だよ。できたら教えてね。</div>
+      <div class="my-phrase-area">
+        <div class="my-phrase-label">自分の言葉メモ</div>
+        <textarea rows="2" placeholder="うちの場合はどう言う？" id="memo0" oninput="checkMemos()"></textarea>
+      </div>
+    </div>
+    <div class="card">
+      <span class="scene-tag">癇癪のとき</span>
+      <div class="ng">NG</div>
+      <div class="phrase ng-bg">いい加減にして！なんでそんなことで！</div>
+      <div class="arrow">↓</div>
+      <div class="ok">OK</div>
+      <div class="phrase ok-bg">そっか、嫌だったんだね。落ち着いたら話そう。</div>
+      <div class="my-phrase-area">
+        <div class="my-phrase-label">自分の言葉メモ</div>
+        <textarea rows="2" placeholder="うちの場合はどう言う？" id="memo1" oninput="checkMemos()"></textarea>
+      </div>
+    </div>
+    <div class="card">
+      <span class="scene-tag">片付け</span>
+      <div class="ng">NG</div>
+      <div class="phrase ng-bg">片付けなさい！なんで散らかすの！</div>
+      <div class="arrow">↓</div>
+      <div class="ok">OK</div>
+      <div class="phrase ok-bg">ブロックだけ箱に入れてくれる？それだけでOK。</div>
+      <div class="my-phrase-area">
+        <div class="my-phrase-label">自分の言葉メモ</div>
+        <textarea rows="2" placeholder="うちの場合はどう言う？" id="memo2" oninput="checkMemos()"></textarea>
+      </div>
+    </div>
+    <div class="card">
+      <span class="scene-tag">宿題・勉強</span>
+      <div class="ng">NG</div>
+      <div class="phrase ng-bg">なんでできないの！みんなできてるのに！</div>
+      <div class="arrow">↓</div>
+      <div class="ok">OK</div>
+      <div class="phrase ok-bg">1問だけやってみよう。できたらすごいよ。</div>
+      <div class="my-phrase-area">
+        <div class="my-phrase-label">自分の言葉メモ</div>
+        <textarea rows="2" placeholder="うちの場合はどう言う？" id="memo3" oninput="checkMemos()"></textarea>
+      </div>
+    </div>
+    <button class="hissatsu-btn" id="hissatsu-voice" onclick="showVoiceHissatsu()">
+      困ったときはここをタップ — 必殺技（4つ書いたら解放）
+    </button>
+  </div>
+
+  <!-- マインド -->
+  <div class="section" id="tab1">
+    <p class="section-label">怒りたくないのに怒ってしまうとき。読むだけで少し心が軽くなるヒント。</p>
+    <div class="mind-card">
+      <div class="mind-num">01</div>
+      <div class="mind-title">「できない」じゃなく「まだできない」</div>
+      <div class="mind-body">子どもはわざとやっているのではなく、まだ脳がそこまで育っていないだけ。</div>
+      <div class="mind-quote">「やる気がないんじゃなくて、動きにくいだけ」</div>
+    </div>
+    <div class="mind-card">
+      <div class="mind-num">02</div>
+      <div class="mind-title">60点でいいママを目指す</div>
+      <div class="mind-body">100点のママを目指すほど、怒りのハードルが下がる。60点でも子どもには十分伝わっている。</div>
+      <div class="mind-quote">「今日も60点。それでじゅうぶん。」</div>
+    </div>
+    <div class="mind-card">
+      <div class="mind-num">03</div>
+      <div class="mind-title">怒ったあとの「ごめんね」は最強</div>
+      <div class="mind-body">怒ってしまっても、あとで「さっきは怒りすぎてごめんね」の一言が親子の信頼を作る。</div>
+      <div class="mind-quote">「完璧に怒らないより、修復できるほうが大事」</div>
+    </div>
+    <div class="mind-card">
+      <div class="mind-num">04</div>
+      <div class="mind-title">ママが笑顔でいることが一番の支援</div>
+      <div class="mind-body">子どものためにがんばりすぎてママが疲弊したら本末転倒。まず自分を満たすことが子育ての質を上げる。</div>
+      <div class="mind-quote">「ママの笑顔は最高の療育」</div>
+    </div>
+    <div class="mind-card">
+      <div class="mind-num">05</div>
+      <div class="mind-title">上2人の失敗は、下2人への財産</div>
+      <div class="mind-body">うまくいかなかった経験は無駄じゃない。その失敗があったから今の対応ができている。</div>
+      <div class="mind-quote">「失敗したママほど、強くなれる」</div>
+    </div>
+    <div class="card" style="margin-top:0.5rem;">
+      <div class="my-phrase-label" style="margin-bottom:6px;">今日の自分へひとこと（書くと必殺技が解放）</div>
+      <textarea rows="3" placeholder="今日がんばったこと、しんどかったこと、なんでも。" id="memo-mind" oninput="checkMindMemo()"></textarea>
+    </div>
+    <button class="hissatsu-btn" id="hissatsu-mind" onclick="showHissatsu('mind')">
+      困ったときはここをタップ — 必殺技（書いたら解放）
+    </button>
+  </div>
+
+  <!-- 癇癪対応 -->
+  <div class="section" id="tab2">
+    <p class="section-label">癇癪が起きたとき、その場で使えるフロー。焦らず上から順に。</p>
+    <div class="flow-step"><div class="flow-dot alert">1</div><div class="flow-content"><div class="flow-title">まず自分が深呼吸</div><div class="flow-desc">声をかける前に1回深呼吸。ママが落ち着いてから動く。</div></div></div>
+    <div class="flow-connector"></div>
+    <div class="flow-step"><div class="flow-dot">2</div><div class="flow-content"><div class="flow-title">気持ちを言葉にする</div><div class="flow-desc">「嫌だったんだね」「悲しかったんだね」と感情を代わりに言葉にしてあげる。</div></div></div>
+    <div class="flow-connector"></div>
+    <div class="flow-step"><div class="flow-dot">3</div><div class="flow-content"><div class="flow-title">そっとそばにいる</div><div class="flow-desc">何もしなくていい。触れてほしくないなら少し離れて「ここにいるよ」だけ伝える。</div></div></div>
+    <div class="flow-connector"></div>
+    <div class="flow-step"><div class="flow-dot">4</div><div class="flow-content"><div class="flow-title">落ち着いてきたら話す</div><div class="flow-desc">癇癪中は話が入らない。落ち着いてから「何が嫌だったの？」と聞く。</div></div></div>
+    <div class="flow-connector"></div>
+    <div class="flow-step"><div class="flow-dot calm">5</div><div class="flow-content"><div class="flow-title">「落ち着けたね」と認める</div><div class="flow-desc">「自分でクールダウンできたね」と伝えると次回につながる。</div></div></div>
+    <div class="card" style="background:var(--color-background-danger);margin-top:0.5rem;">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;">やってはいけないこと</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">・癇癪中に説教する<br>・「なんで？」と原因を問い詰める<br>・「また始まった」と言う<br>・無理やり止めようとする</div>
+    </div>
+    <div class="card" style="margin-top:0.5rem;">
+      <div class="my-phrase-label" style="margin-bottom:6px;">今日どんな癇癪があった？（書くと必殺技が解放）</div>
+      <textarea rows="2" placeholder="場所・きっかけ・どう対応したか" id="memo-kanshaku" oninput="checkKanshakuMemo()"></textarea>
+    </div>
+    <button class="hissatsu-btn" id="hissatsu-kanshaku" onclick="showHissatsu('kanshaku')">
+      困ったときはここをタップ — 必殺技（書いたら解放）
+    </button>
+  </div>
+
+  <!-- 夜チェック -->
+  <div class="section" id="tab3">
+    <p class="section-label">朝をスムーズにするために、夜のうちに準備。全部チェックで必殺技が解放されます。</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress" style="width:0%"></div></div>
+
+    <div class="night-label">
+      <i class="ti ti-moon" aria-hidden="true"></i>
+      朝のために夜のうちにチェック
+    </div>
+
+    <div class="card">
+      <div id="checklist"></div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:0.75rem;">
+      <button onclick="resetChecks()" style="font-size:12px;color:var(--color-text-secondary);background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:6px 16px;cursor:pointer;">リセット</button>
+    </div>
+    <button class="hissatsu-btn" id="hissatsu-asa" onclick="showHissatsu('asa')">
+      困ったときはここをタップ — 必殺技（全部チェックで解放）
+    </button>
+  </div>
+</div>
+
+<!-- 声かけ変換：4つ必殺技モーダル -->
+<div class="hissatsu-overlay" id="overlay-voice" onclick="hideOverlay('voice',event)">
+  <div class="hissatsu-modal">
+    <div class="hissatsu-badge">必殺技 4つ 発動</div>
+    <div class="hissatsu-modal-title">困ったときはこれで乗り切る</div>
+    <div class="h-item">
+      <div class="h-scene">朝の支度</div>
+      <div class="h-text">「あれ？靴下の次なんだっけ〜？ママ忘れちゃった！教えて！」</div>
+      <div class="h-sub">→ 子どもが教える側になると不思議と動き出す</div>
+    </div>
+    <div class="h-item">
+      <div class="h-scene">癇癪のとき</div>
+      <div class="h-text">「飴とジュース、どっちにする？」</div>
+      <div class="h-sub">→ 戦うのをやめて甘やかす。癇癪とイライラが戦い続けるより全然いい</div>
+    </div>
+    <div class="h-item">
+      <div class="h-scene">片付け</div>
+      <div class="h-text">「ごめーん！このこのおうちどこだっけ？」</div>
+      <div class="h-sub">→ イライラしてるときこそ、とぼける</div>
+    </div>
+    <div class="h-item">
+      <div class="h-scene">宿題・勉強</div>
+      <div class="h-text">「え？ここできてる！？超天才じゃん！！」</div>
+      <div class="h-sub">→ とにかく天才と連呼する。褒められると続く</div>
+    </div>
+    <button class="hissatsu-close" onclick="closeOverlay('voice')">閉じる</button>
+  </div>
+</div>
+
+<!-- その他必殺技モーダル -->
+<div class="hissatsu-overlay" id="overlay-single" onclick="hideOverlay('single',event)">
+  <div class="hissatsu-modal">
+    <div class="hissatsu-badge">必殺技 発動</div>
+    <div class="hissatsu-modal-title" id="modal-title"></div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.8;white-space:pre-line;" id="modal-body"></div>
+    <button class="hissatsu-close" onclick="closeOverlay('single')">閉じる</button>
+  </div>
+</div>
+
+<script>
+const singleData = {
+  mind: {
+    title: "今日も生きた。それだけで100点。",
+    body: "今日うまくいかなかったとしても、あなたは今日も子どもの隣にいた。\n\nそれだけで十分すぎる。\n\n明日また60点を目指せばいい。今夜は休んで。"
+  },
+  kanshaku: {
+    title: "飴とジュース、どっちにする？",
+    body: "「飴とジュース、どっちがいい？」\n\nそれだけ言って、あとは黙って渡す。\n\n癇癪とイライラが戦い続けるより、甘やかして終わらせる方が全然いい。今日だけは戦わなくていい。"
+  },
+  asa: {
+    title: "朝をスムーズにする2つの秘訣",
+    body: "【持ち物は基本固定】\nあれやだ・これやだを防ぐために持ち物は固定にする。こだわりが強い子には靴下・ハンカチなど同じものを複数用意しておくと◎\n\n【朝食はパターン化して選ばせる】\n朝一番に「今日何食べたい？」と聞いて、すぐ出せるものから選んでもらう。\n\n我が家の例：\nヤクルト＋おにぎりorシリアル＋ヨーグルト\n\n強制的に与えられるより自分で選んだほうが文句が出ない！"
+  }
+};
+
+const checkItems = [
+  { label: "着替えを出しておく", note: "翌日の服をセットしておくと朝の選択ゼロに" },
+  { label: "荷物を確認する", note: "ランドセル・バッグの中身を前日夜にチェック" },
+  { label: "朝食のパターンを決める", note: "例：ヤクルト＋おにぎりorシリアル＋ヨーグルト" },
+  { label: "ぐずった時のお気に入りグッズを確認", note: "噛みネックレス・フィジェット・好きなぬいぐるみなど" }
+];
+let checks = new Array(checkItems.length).fill(false);
+
+function renderChecklist() {
+  const done = checks.filter(Boolean).length;
+  const pct = Math.round(done / checkItems.length * 100);
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('checklist').innerHTML = checkItems.map((item, i) => `
+    <div class="check-item" onclick="toggleCheck(${i})">
+      <div class="check-box ${checks[i]?'checked':''}">
+        ${checks[i]?'<i class="ti ti-check" style="font-size:13px;color:var(--color-text-success);" aria-hidden="true"></i>':''}
+      </div>
+      <div style="flex:1;">
+        <div class="check-label ${checks[i]?'checked':''}">${item.label}</div>
+        <div class="check-note">${item.note}</div>
+      </div>
+    </div>`).join('');
+  const btn = document.getElementById('hissatsu-asa');
+  if (done === checkItems.length) {
+    btn.classList.add('unlocked');
+    btn.textContent = '困ったときはここをタップ — 必殺技 解放！';
+  } else {
+    btn.classList.remove('unlocked');
+    btn.textContent = `困ったときはここをタップ — 必殺技（あと${checkItems.length-done}つでOK）`;
+  }
+}
+
+function toggleCheck(i) { checks[i]=!checks[i]; renderChecklist(); }
+function resetChecks() { checks=new Array(checkItems.length).fill(false); renderChecklist(); }
+
+function checkMemos() {
+  const filled = [0,1,2,3].filter(i => document.getElementById('memo'+i).value.trim().length > 0).length;
+  const btn = document.getElementById('hissatsu-voice');
+  if (filled === 4) {
+    btn.classList.add('unlocked');
+    btn.textContent = '困ったときはここをタップ — 必殺技 4つ 解放！';
+  } else {
+    btn.classList.remove('unlocked');
+    btn.textContent = `困ったときはここをタップ — 必殺技（あと${4-filled}つ書くと解放）`;
+  }
+}
+
+function checkMindMemo() {
+  const v = document.getElementById('memo-mind').value.trim();
+  const btn = document.getElementById('hissatsu-mind');
+  btn.classList.toggle('unlocked', v.length > 0);
+  btn.textContent = v.length > 0 ? '困ったときはここをタップ — 必殺技 解放！' : '困ったときはここをタップ — 必殺技（書いたら解放）';
+}
+
+function checkKanshakuMemo() {
+  const v = document.getElementById('memo-kanshaku').value.trim();
+  const btn = document.getElementById('hissatsu-kanshaku');
+  btn.classList.toggle('unlocked', v.length > 0);
+  btn.textContent = v.length > 0 ? '困ったときはここをタップ — 必殺技 解放！' : '困ったときはここをタップ — 必殺技（書いたら解放）';
+}
+
+function showVoiceHissatsu() {
+  if (!document.getElementById('hissatsu-voice').classList.contains('unlocked')) return;
+  document.getElementById('overlay-voice').classList.add('show');
+}
+
+function showHissatsu(key) {
+  const btnId = key==='kanshaku'?'hissatsu-kanshaku':key==='mind'?'hissatsu-mind':'hissatsu-asa';
+  if (!document.getElementById(btnId).classList.contains('unlocked')) return;
+  const d = singleData[key];
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-body').textContent = d.body;
+  document.getElementById('overlay-single').classList.add('show');
+}
+
+function hideOverlay(type, e) {
+  if (e.target === document.getElementById('overlay-'+type)) closeOverlay(type);
+}
+function closeOverlay(type) {
+  document.getElementById('overlay-'+type).classList.remove('show');
+}
+function switchTab(n) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  document.querySelectorAll('.section').forEach((s,i)=>s.classList.toggle('active',i===n));
+}
+
+renderChecklist();
+</script>
